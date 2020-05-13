@@ -31,6 +31,9 @@
 </template>
 
 <script>
+const minDate = new Date(0);
+const maxDate = new Date(0xffffffff * 1000);
+
 export default {
   name: 'App',
 
@@ -50,8 +53,9 @@ export default {
     },
 
     getObjectIdFromDate(date) {
-      if (Number.isNaN(date.getTime())) return '';
-      const timeStr = Math.floor(date.getTime() / 1000).toString(16);
+      const time = date.getTime();
+      if (Number.isNaN(time) || date < minDate || date > maxDate) return '';
+      const timeStr = Math.floor(time / 1000).toString(16);
       return `${'0'.repeat(8 - timeStr.length) + timeStr}0000000000000000`;
     },
 
