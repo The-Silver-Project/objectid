@@ -25,6 +25,34 @@
             spellcheck="false"
           >
         </label>
+
+        <label>
+          Relative Time
+          <input
+            type="number"
+            v-model="relativeTimeNum"
+            @input="handleRelativeTimeInput({ num: $event.target.value })"
+            placeholder="Time"
+          >
+          <select
+            v-model="relativeTimeUnit"
+            @input="handleRelativeTimeInput({ unit: $event.target.value })"
+          >
+            <option>ms</option>
+            <option>sec</option>
+            <option>min</option>
+            <option>hour</option>
+            <option>day</option>
+          </select>
+
+          <select
+            v-model="relativeTimeSign"
+            @input="handleRelativeTimeInput({ timeSign: $event.target.value })"
+          >
+            <option>ago</option>
+            <option>from now</option>
+          </select>
+        </label>
       </section>
     </main>
   </section>
@@ -34,12 +62,23 @@
 const minDate = new Date(0);
 const maxDate = new Date(0xffffffff * 1000);
 
+const timeMapping = {
+  ms: 1,
+  sec: 1000,
+  min: 1000 * 60,
+  hour: 1000 * 60 * 60,
+  day: 1000 * 60 * 60 * 24,
+};
+
 export default {
   name: 'App',
 
   data: () => ({
     objectId: '',
     isoTimestamp: '',
+    relativeTimeNum: '',
+    relativeTimeUnit: 'ms',
+    relativeTimeSign: 'ago',
   }),
 
   methods: {
@@ -59,15 +98,51 @@ export default {
       return `${'0'.repeat(8 - timeStr.length) + timeStr}0000000000000000`;
     },
 
+    setRelativeTimeFromIsoTime(isoTimestamp) {
+      const then = new Date(isoTimestamp);
+      if (Number.isNaN(then.getTime())) {
+        this.relativeTimeNum = '';
+        return;
+      }
+      const now = new Date();
+
+      if (now > then) this.relativeTimeSign = 'ago';
+      else this.relativeTimeSign = 'from now';
+
+      const ms = Math.abs(now - then);
+      this.relativeTimeNum = ms / timeMapping[this.relativeTimeUnit];
+    },
+
     handleObjectIdInput(event) {
       const objectId = event.target.value;
       this.isoTimestamp = this.getIsoDateStringFromObjectId(objectId);
+      this.setRelativeTimeFromIsoTime(this.isoTimestamp);
     },
 
     handleIsoTimestampInput(event) {
       const isoTimestamp = event.target.value;
       const date = new Date(isoTimestamp);
       this.objectId = this.getObjectIdFromDate(date);
+      this.setRelativeTimeFromIsoTime(isoTimestamp);
+    },
+
+    handleRelativeTimeInput({ num, unit, timeSign }) {
+      if (!this.relativeTimeNum) {
+        this.objectId = '';
+        this.isoTimestamp = '';
+        return;
+      }
+
+      const now = new Date();
+
+      const toAdd = (num || this.relativeTimeNum) * timeMapping[(unit || this.relativeTimeUnit)];
+      const sign = (timeSign || this.relativeTimeSign) === 'ago' ? -1 : 1;
+      const finalDate = new Date(now.getTime() + sign * toAdd);
+
+      if (Number.isNaN(finalDate.getTime())) return;
+
+      this.isoTimestamp = finalDate.toISOString();
+      this.objectId = this.getObjectIdFromDate(finalDate);
     },
   },
 };
