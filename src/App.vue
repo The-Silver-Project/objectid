@@ -195,6 +195,26 @@ input {
 input::placeholder {
   color: #b9b39e79;
 }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+select {
+  appearance: none;
+  margin-right: 12px;
+  outline: 0;
+  border: 0;
+  background-color: #63614F;
+  color: #fcf6da;
+  text-align-last: right;
+  border-radius: 18px;
+  text-transform: uppercase;
+  font-weight: 900;
+  font-size: 9px;
+  padding: 6px 9px;
+}
 
 @media all and (min-width: 400px) {
   .fields-wrap {
@@ -210,12 +230,21 @@ input::placeholder {
   input {
     font-size: 36px;
   }
+
+  select {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
 }
 
 @media all and (min-width: 800px) {
   input {
     font-size: 48px;
     width: 700px;
+  }
+
+  select {
+    padding: 9px 18px;
   }
 }
 
